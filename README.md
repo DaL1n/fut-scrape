@@ -1,17 +1,53 @@
-# Setup
+# fut-scrape
 
-	mkdir ds-toolbox
-	cd ds-toolbox
-	# Use the data-science-at-the-command-line Vagrant box
-	vagrant init data-science-toolbox/data-science-at-the-command-line
-	# Start the Vagrant box
-	vagrant up
-	# Connect to the Vagrant box via SSH (NOTE: Windows requires Cygwin or similar)
-	# Login info (user: vagrant, pw: vagrant)
-	vagrant ssh
-	# Hint: Local files in the `ds-toolbox` folder are mapped to the virtualbox folder `/vagrant`
-	cd /vagrant
+fut-scrape is a tool for scraping FIFA Ultimate Team ("FUT") player stats using bash command line tools.
+
+## Motivation
+
+I have a background in Python, R and Octave/Matlab but I've never quite got the hang of bash. Until I decided to pick a book called "Data Science at the Command Line: Facing the Future with Time-Tested Tools" by Jeroen Janssens (2014). I got inspired by the concept of Unix pipes and the robustness of establish bash command line tools, and I wanted to excercise those tools by doing a small project that I have personal interest in.
+
+Enter FIFA, a game probably second closest to my heart right after my high school sweetheart World of Warcraft. EA has an API for querying FUT player card stats which I utilize in this project. 
+
+This project has the following objectives:
+
+1. Scrape and archive FUT player card stats starting from FIFA 18
+2. Explore the data and identify interesting correlations
+3. Visualize the findings
+
+
+## Prerequisites
+
+* [git](https://git-scm.com/downloads)
+* [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
+* [Vagrant](https://www.vagrantup.com/downloads.html)
+
+## Install instructions
+
+1. Install git, Virtualbox and Vagrant
+2. Use git clone to download the repository: `git clone https://github.com/smomni/fut-scraper`
+3. Go to download directory: `cd fut-scraper`
+4. Initialize Vagrant box: `vagrant init data-science-toolbox/data-science-at-the-command-line`
+5. Start the Vagrant box: `vagrant up`
+6. Connect to the Vagrant box via SSH: `vagrant ssh`
+
+Local files in the `fut-scraper` directory are mapped to `/vagrant` in the Vagrant box.
+
+## Running the scraper
+
+TODO
 	
+### Data overview
+
+The data contains FUT player card information for every player in the game.
+
+The file raw_data contains the following fields for each player card:
+
+* playerType: Icon = legends
+
+## Data exploration
+
+TODO: Attribute correlation matrix
+
 
 
 
