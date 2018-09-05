@@ -1,0 +1,76 @@
+BASE=data/
+
+sample_raw_data.json <- [-timecheck]
+    # Load page 1 as sample data
+    curl -s https://www.easports.com/fifa/ultimate-team/api/fut/item?page=1 | jq '.' > $OUTPUT
+
+raw_data.json <- [-timecheck]
+    # Parallel query all pages from FUT API and write to single JSON file
+    parallel -j0 --progress --delay 0.01 --results results "curl -s https://www.easports.com/fifa/ultimate-team/api/fut/item?page={1}" ::: {1..902} > $OUTPUT
+
+player_clubs.csv <- raw_data.json
+    # Exract player_id and clud_id to CSV intersection table
+    < $INPUT jq -c '.items[] | {player_id: .id, club_id: .club.id}' | 
+    json2csv -p -d ";" -k player_id,club_id > $OUTPUT
+
+clubs.csv <- raw_data.json
+    # Exract meta data on clubs and write unique rows to CSV
+    # FIXME: "shell command failed with exit code 1" even though the output is written
+    < $INPUT jq -c '.items[].club | {club_id: .id, club_name: .name, club_abbr_name: .abbrName}' | 
+    json2csv -p=false -d ";" -k club_id,club_name,club_abbr_name | 
+    sort -u | 
+    header -a 'club_id;club_name;club_abbr_name' > $OUTPUT
+
+player_leagues.csv <- raw_data.json
+    # Exract player_id and league_id to CSV intersection table
+    < $INPUT jq -c '.items[] | {player_id: .id, league_id: .league.id}' | 
+    json2csv -p -d ";" -k player_id,league_id > $OUTPUT
+
+leagues.csv <- raw_data.json
+    # Exract meta data on leagues and write unique rows to CSV
+    < $INPUT jq -c '.items[].league | {league_id: .id, league_name: .name, league_abbr_name: .abbrName}' | 
+    json2csv -p=false -d ";" -k league_id,league_name,league_abbr_name | 
+    sort -u | 
+    header -a 'league_id;league_name;league_abbr_name' > $OUTPUT
+
+player_nations.csv <- raw_data.json
+    # Exract player_id and nation_id to CSV intersection table
+    < $INPUT jq -c '.items[] | {player_id: .id, nation_id: .nation.id}' | 
+    json2csv -p -d ";" -k player_id,nation_id > $OUTPUT
+
+nations.csv <- raw_data.json
+    # Exract meta data on nations and write unique rows to CSV
+    < $INPUT jq -c '.items[].nation | {nation_id: .id, nation_name: .name, nation_abbr_name: .abbrName}' | 
+    json2csv -p=false -d ";" -k nation_id,nation_name,nation_abbr_name | 
+    sort -u | 
+    header -a 'nation_id;nation_name;nation_abbr_name' > $OUTPUT
+
+player_traits.csv <- raw_data.json
+    # Extract player traits to CSV
+    # The '?' operator catches and ignores errors, such as "jq: error: Cannot iterate over null" from missing values
+    < $INPUT jq -c '.items[] | {player_id: .id, trait: .traits[]?}' | 
+    json2csv -p -d ";" -k player_id,trait > $OUTPUT
+
+player_specialities.csv <- raw_data.json
+    # Extract player specialities to CSV
+    # The '?' operator catches and ignores errors, such as "jq: error: Cannot iterate over null" from missing values
+    < $INPUT jq -c '.items[] | {player_id: .id, speciality: .specialities[]?}' | 
+    json2csv -p -d ";" -k player_id,speciality > $OUTPUT
+
+player_attributes.csv <- raw_data.json
+    # Extract player attributes to CSV
+    # Note that attributes.chemistryBonus is omitted from extract
+    < $INPUT jq -c '.items[] | {player_id: .id, attribute_name: .attributes[].name, attribute_value: .attributes[].value}' | 
+    json2csv -p -d ";" -k player_id,attribute_name,attribute_value > $OUTPUT
+
+players.csv <- raw_data.json
+    # Extract player information to CSV
+    < $INPUT jq -c '.items[] | {player_id: .id, rating, name, common_name: .commonName, first_name: .firstName, last_name: .lastName, position, composure, play_style: .playStyle, heigth, weight, birthdate, age, acceleration, aggression, agility, balance, ballcontrol, foot, skill_moves: .skillMoves, crossing, curve, dribbling, finishing, freekickaccuracy, gkdiving, gkhandling, gkkicking, gkpositioning, gkreflexes, headingaccuracy, interceptions, jumping, longpassing, marking, penalties, positioning, potential, reactions, shortpassing, shotpower, slidingtackle, sprintspeed, standingtackle, stamina, strength, vision, volleys, weakfoot, atk_work_rate: .atkWorkRate, def_work_rate: .defWorkRate, player_type: .playerType, quality, color, is_gk: .isGK, position_full: .positionFull, is_special_type: .isSpecialType, contracts, fitness, raw_attribute_chemistry_bonus: .rawAttributeChemistyBonus, is_loan: .isLoan, squad_position: .squadPosition, icon_attributes: .iconAttributes, item_type: .itemType, discard_value: .discardValue, modelname, base_id: .baseId}' | 
+    json2csv -p -d ";" -k player_id,rating,name,common_name,first_name,last_name,position,composure,play_style,heigth,weight,birthdate,age,acceleration,aggression,agility,balance,ballcontrol,foot,skill_moves,crossing,curve,dribbling,finishing,freekickaccuracy,gkdiving,gkhandling,gkkicking,gkpositioning,gkreflexes,headingaccuracy,interceptions,jumping,longpassing,marking,penalties,positioning,potential,reactions,shortpassing,shotpower,slidingtackle,sprintspeed,standingtackle,stamina,strength,vision,volleys,weakfoot,atk_work_rate,def_work_rate,player_type,quality,color,is_gk,position_full,is_special_type,contracts,fitness,raw_attribute_chemistry_bonus,is_loan,squad_position,icon_attributes,item_type,discard_value,modelname,base_id > $OUTPUT
+
+fut.db <- clubs.csv,leagues.csv,nations.csv,player_attributes.csv,player_clubs.csv,player_leagues.csv,player_nations.csv,player_specialities.csv,player_traits.csv,players.csv
+    # Remove output file to prevent SQLite from appending the existing database file
+    rm -f $OUTPUT
+    # Convert CSV files to SQLite tables (table name = file name without .csv extension)
+    # Note that SQLite does not support parallel insertions (the database is locked by one process)
+    parallel -j1 --progress --delay 0.1 "basename {1} .csv | xargs echo -e '.separator ;\n.import {1}' | sqlite3 $OUTPUT" ::: {$INPUT0,$INPUT1,$INPUT2,$INPUT3,$INPUT4,$INPUT5,$INPUT6,$INPUT7,$INPUT8,$INPUT9}
