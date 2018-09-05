@@ -1,3 +1,5 @@
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/smomni/fut-scrape.svg?columns=all)](https://waffle.io/smomni/fut-scrape)
+
 # fut-scrape
 
 fut-scrape is a tool for scraping FIFA Ultimate Team ("FUT") player stats using bash command line tools.
@@ -32,9 +34,9 @@ This project has the following objectives:
 
 Local files in the `fut-scraper` directory are mapped to `/vagrant` in the Vagrant box.
 
-## Running the scraper
+## Data workflow
 
-TODO
+The data workflow is specified in the [Drakefile](Drakefile). Run `drake` to execute the workflow.
 	
 ### Data overview
 
