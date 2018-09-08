@@ -66,5 +66,19 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get install -y sqlite3
+    # Download pyenv
+    git clone https://github.com/pyenv/pyenv.git /home/vagrant/.pyenv
+    # Update path and reset shell
+    echo 'export PYENV_ROOT="/home/vagrant/.pyenv"' >> /etc/profile.d/pyenv.sh
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> /etc/profile.d/pyenv.sh
+    echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> /etc/profile.d/pyenv.sh
+    source /etc/profile
+    # Ensure ownership of the home directory for user "vagrant"
+    chown -R vagrant /home/vagrant
+    # Install Python 3.6.5
+    apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev
+    pyenv install 3.6.5
+    # FIXME: pyenv doesn't detected preinstalled Python 3.4 (2.7 is detected as "system")
+    # FIXME: source /etc/profile needs to be called when SSHing into the VM
   SHELL
 end
