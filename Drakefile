@@ -67,24 +67,3 @@ players.csv <- raw_data.json
     # Extract player information to CSV
     < $INPUT jq -c '.items[] | {player_id: .id, rating, name, common_name: .commonName, first_name: .firstName, last_name: .lastName, position, composure, play_style: .playStyle, heigth, weight, birthdate, age, acceleration, aggression, agility, balance, ballcontrol, foot, skill_moves: .skillMoves, crossing, curve, dribbling, finishing, freekickaccuracy, gkdiving, gkhandling, gkkicking, gkpositioning, gkreflexes, headingaccuracy, interceptions, jumping, longpassing, marking, penalties, positioning, potential, reactions, shortpassing, shotpower, slidingtackle, sprintspeed, standingtackle, stamina, strength, vision, volleys, weakfoot, atk_work_rate: .atkWorkRate, def_work_rate: .defWorkRate, player_type: .playerType, quality, color, is_gk: .isGK, position_full: .positionFull, is_special_type: .isSpecialType, contracts, fitness, raw_attribute_chemistry_bonus: .rawAttributeChemistyBonus, is_loan: .isLoan, squad_position: .squadPosition, icon_attributes: .iconAttributes, item_type: .itemType, discard_value: .discardValue, modelname, base_id: .baseId}' | 
     json2csv -p -d ";" -k player_id,rating,name,common_name,first_name,last_name,position,composure,play_style,heigth,weight,birthdate,age,acceleration,aggression,agility,balance,ballcontrol,foot,skill_moves,crossing,curve,dribbling,finishing,freekickaccuracy,gkdiving,gkhandling,gkkicking,gkpositioning,gkreflexes,headingaccuracy,interceptions,jumping,longpassing,marking,penalties,positioning,potential,reactions,shortpassing,shotpower,slidingtackle,sprintspeed,standingtackle,stamina,strength,vision,volleys,weakfoot,atk_work_rate,def_work_rate,player_type,quality,color,is_gk,position_full,is_special_type,contracts,fitness,raw_attribute_chemistry_bonus,is_loan,squad_position,icon_attributes,item_type,discard_value,modelname,base_id > $OUTPUT
-
-players.sql <- players.csv
-    # Infer data types and create CREATE TABLE SQL statement
-    csvsql $INPUT > $OUTPUT
-
-fut.db <- clubs.csv,leagues.csv,nations.csv,player_attributes.csv,player_clubs.csv,player_leagues.csv,player_nations.csv,player_specialities.csv,player_traits.csv,players.csv
-    # Remove output file to prevent SQLite from appending the existing database file
-    rm -f $OUTPUT
-    # Convert CSV files to SQLite tables (table name = file name without .csv extension)
-    # Note that SQLite does not support parallel insertions (the database is locked by one process)
-    # TODO: SQLite .import uses TEXT data type for all columns. How to infer data types?
-    parallel -j1 --progress --delay 0.1 "echo -e '.separator ;\n.import {} {/.}' | sqlite3 $OUTPUT" ::: $INPUTS
-    # FIXME: csvsql fails in "parallel" and "for" loops
-    #parallel -j1 --progress --timeout 5 --delay 0.1 "csvsql --db sqlite:///$OUTPUT --table {/.} --insert {}" ::: $INPUTS
-    #for i in $INPUTS
-    #    do
-    #        #csvsql --db sqlite:///$OUTPUT --table $(basename $i .csv) --insert $i
-    #        #csvsql --db sqlite:///$OUTPUT --table $i --insert $i
-    #        echo "Import $i to $OUTPUT"
-    #        csvsql --db sqlite:///$OUTPUT --table $i --insert $i
-    #    done
