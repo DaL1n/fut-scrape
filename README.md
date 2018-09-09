@@ -2,7 +2,7 @@
 
 # fut-scrape
 
-fut-scrape is a tool for scraping FIFA Ultimate Team ("FUT") player stats using bash, SQL and Python.
+fut-scrape is a tool for scraping and analyzing FIFA Ultimate Team ("FUT") player stats using bash, SQL and Python.
 ## Motivation
 
 I have a background in Python, R and Octave/Matlab but I've never quite got the hang of bash. Until I decided to pick a book called "Data Science at the Command Line: Facing the Future with Time-Tested Tools" by Jeroen Janssens (2014). I got inspired by the concept of Unix pipes and the robustness of bash command line tools, and wanted to excercise using those tools by doing a small project that I have personal interest in. Enter FIFA, a game second closest to my heart right after my high school sweetheart World of Warcraft. Electronic Arts ("EA") has an API for querying FUT player card stats which I utilize in this project. 
