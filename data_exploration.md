@@ -1,4 +1,8 @@
-# Correlations
+# Data overview
+
+The data contains FUT player card information for every player in the game.
+
+## Player attribute correlations
 
 * reactions <-> rating: 0.89
 * dribbling <-> crossing: 0.87

@@ -2,8 +2,7 @@
 
 # fut-scrape
 
-fut-scrape is a tool for scraping FIFA Ultimate Team ("FUT") player stats using bash command line tools.
-
+fut-scrape is a tool for scraping FIFA Ultimate Team ("FUT") player stats using bash, SQL and Python.
 ## Motivation
 
 I have a background in Python, R and Octave/Matlab but I've never quite got the hang of bash. Until I decided to pick a book called "Data Science at the Command Line: Facing the Future with Time-Tested Tools" by Jeroen Janssens (2014). I got inspired by the concept of Unix pipes and the robustness of establish bash command line tools, and I wanted to excercise those tools by doing a small project that I have personal interest in.
@@ -36,22 +35,4 @@ Local files in the `fut-scraper` directory are mapped to `/vagrant` in the Vagra
 
 ## Data workflow
 
-The data workflow is specified in the [Drakefile](Drakefile). Run `drake` to execute the workflow.
-	
-### Data overview
-
-The data contains FUT player card information for every player in the game.
-
-The file raw_data contains the following fields for each player card:
-
-* playerType: Icon = legends
-
-## Data exploration
-
-TODO: Attribute correlation matrix
-
-
-
-
-
-	
+The data workflow is implemented using [Drake](https://github.com/Factual/drake) in a [Drakefile](Drakefile). To execute the workflow, run `drake` in shell.
